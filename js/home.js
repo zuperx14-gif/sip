@@ -208,10 +208,12 @@ function updateTiles(m, t) {
     if (!r.enabled) text = 'Switched off';
     else if (m.s.paused) text = 'Paused';
     else if (due) text = 'Due now';
+    // Asleep: nothing is sent until wake-up, whatever timer a late "Done" left behind.
+    else if (!m.s.awake) text = m.s.next_wake ? `After ${hhmm(m.s.next_wake)}` : 'Resting';
     else if (!r.next_due) text = 'Resting';
     else {
       const until = new Date(r.next_due).getTime() - t;
-      text = until <= 0 ? 'Any second now' : !m.s.awake ? `Next at ${fmtClock(r.next_due)}` : `Next in ${fmtDur(until)}`;
+      text = until <= 0 ? 'Any second now' : `Next in ${fmtDur(until)}`;
     }
     setText($('.tile-sub', el), text);
     el.classList.toggle('due', due);
