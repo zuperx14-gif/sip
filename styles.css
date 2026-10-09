@@ -651,3 +651,5 @@ svg { display: block; }
 .shift-chip:active { transform: scale(0.95); }
 .shift-chip[aria-pressed="true"] { background: var(--water-800); border-color: var(--water-800); color: var(--water-100); }
 .shift-chip[aria-pressed="true"] b { color: #fff; }
+.row.col .field.wide { width: 100%; margin-top: 10px; }
+.row.col + .row.col { border-top: 1px solid var(--line); }
