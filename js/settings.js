@@ -1,5 +1,5 @@
 // Settings sheet. Changes save themselves a moment after you make them.
-import { $, h, icon, state, rpc, load, on, emit, toast, setKey, setRole, store, fmtDur } from './core.js';
+import { $, h, icon, state, rpc, load, on, emit, toast, setKey, setRole, store, fmtDur, shiftDay, dayLabel } from './core.js';
 import { pushStatus, enablePush, disablePush, refreshPush } from './push.js';
 
 const sheet = $('#settings');
@@ -203,6 +203,42 @@ function tzControl(s) {
   return sel;
 }
 
+// Two weeks of day chips; tap the nights that are work nights.
+function shiftSection(d) {
+  const s = d.settings;
+  const on = new Set(d.shifts || []);
+  const strip = h('div', { class: 'shift-strip', role: 'group', 'aria-label': 'Work nights' });
+  for (let i = 0; i < 14; i++) {
+    const key = shiftDay(d.today, i);
+    const chip = h('button', { type: 'button', class: 'shift-chip', 'aria-pressed': String(on.has(key)),
+      'aria-label': `${dayLabel(key, { weekday: 'long', month: 'short', day: 'numeric' })} night` },
+      h('span', { text: i === 0 ? 'Today' : dayLabel(key, { weekday: 'short' }) }),
+      h('b', { text: String(Number(key.slice(8))) }));
+    chip.addEventListener('click', async () => {
+      const next = chip.getAttribute('aria-pressed') !== 'true';
+      chip.setAttribute('aria-pressed', String(next));
+      mark('', 'Saving…');
+      try {
+        await rpc('set_shift', { p_day: key, p_on: next });
+        mark('ok', 'Saved');
+        load();
+      } catch (e) {
+        chip.setAttribute('aria-pressed', String(!next));
+        mark('err', "Couldn't save");
+        toast(e.message);
+      }
+    });
+    strip.append(chip);
+  }
+  return h('section', { class: 'group' },
+    h('h3', { class: 'group-title', text: 'Work nights' }),
+    h('div', { class: 'list' },
+      h('div', { class: 'row col' }, strip),
+      row('Sleep after a shift from', null, timeInput('Sleep after a shift from', s.day_sleep_start, (v) => queue({ day_sleep_start: v }))),
+      row('Until', null, timeInput('Sleep after a shift until', s.day_sleep_end, (v) => queue({ day_sleep_end: v })), 'sub')),
+    h('p', { class: 'group-note', text: 'Tap the nights with a night shift. Nudges keep going through the shift and stay quiet for sleep the next day. Other days follow the normal wake-up and bedtime.' }));
+}
+
 function build() {
   const d = state.data, s = d.settings;
   const rem = Object.fromEntries(d.reminders.map((r) => [r.kind, r]));
@@ -220,6 +256,7 @@ function build() {
     row('Goes to sleep', null, timeInput('Goes to sleep', s.sleep, (v) => queue({ sleep: v }))),
     row('Timezone', null, tzControl(s)),
   ], 'Nudges only happen between wake-up and bedtime.'));
+  kids.push(shiftSection(d));
 
   const remRows = [];
   for (const [kind, label] of [['water', 'Water'], ['bathroom', 'Bathroom breaks']]) {

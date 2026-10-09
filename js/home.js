@@ -157,7 +157,7 @@ function updateHero() {
     const q = quietEnd(m.s);
     setText(kicker, q ? 'Quiet time' : 'Sleeping');
     setWords(big, q ? 'Shh, quiet time' : 'Resting up');
-    setText(sub, q ? `Nudges pick back up at ${hhmm(q)}.` : `Nudges start again at ${hhmm(m.s.wake)}.`);
+    setText(sub, q ? `Nudges pick back up at ${hhmm(q)}.` : `Nudges start again at ${hhmm(m.s.next_wake || m.s.wake)}.`);
     level = 0.42;
   } else if (m.st === 'paused') {
     setText(kicker, 'Paused');
