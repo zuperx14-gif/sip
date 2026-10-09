@@ -54,6 +54,8 @@ function dayStats(key) {
 }
 
 function streak() {
+  const p = state.data.points;
+  if (p) return p.streak;
   let n = 0;
   let key = state.data.today;
   for (let i = 0; i < 30; i++, key = shiftDay(key, -1)) {
@@ -341,6 +343,33 @@ function renderToday() {
       h('div', { class: 'mini' }, h('b', { text: String(week) }), h('span', { text: 'Done this week' }))));
 }
 
+// Points: +200 water and +100 bathroom for a clean day, 3x off for any miss.
+function renderPoints() {
+  const box = $('#points');
+  const p = state.data.points;
+  box.hidden = !p;
+  if (!p) return;
+  const fmt = (n) => `${n < 0 ? '−' : ''}${Math.abs(n).toLocaleString()}`;
+  const goal = p.goal || 30;
+  const into = p.streak % goal;
+  const laps = Math.floor(p.streak / goal);
+  const lost = p.today.lost;
+  const todayLine = lost < 0
+    ? h('p', { class: 'pts-today bad', text: `${fmt(lost)} today. A missed check-in costs 3×.` })
+    : h('p', { class: 'pts-today', text: partner() ? '+300 banks tonight if the day stays clean.' : '+300 is yours tonight if today stays clean.' });
+  const bar = h('div', { class: 'pts-bar', role: 'img', 'aria-label': `${into} of ${goal} days toward the next streak milestone` },
+    h('i', { style: `width:${(into / goal) * 100}%` }));
+  box.replaceChildren(
+    cardHead('Points', h('span', { class: 'card-meta', text: p.best_streak ? `Best streak ${p.best_streak}` : '' })),
+    h('p', { class: `pts-total${p.total < 0 ? ' neg' : ''}` }, fmt(p.total), h('small', { text: 'points' })),
+    todayLine,
+    bar,
+    h('div', { class: 'pts-legend' },
+      h('span', { text: p.streak === 0 ? 'Streak starts with one clean day' : `Day ${into || goal} of ${goal}` }),
+      h('span', { text: laps > 0 ? `${laps} × 30-day streak` : `${goal - into} to a 30-day streak` })),
+    h('p', { class: 'pts-rules', text: 'Clean day: +200 water, +100 bathroom. Any miss: −600 or −300 instead.' }));
+}
+
 function weekDays() {
   const out = [];
   for (let i = 6; i >= 0; i--) {
@@ -502,10 +531,11 @@ function render() {
   const tileSig = JSON.stringify([state.role, m.rems.map((r) => [r.kind, r.enabled]), m.s.require_photo]);
   if (sigs.tiles !== tileSig) { sigs.tiles = tileSig; sigs.hero = null; buildTiles(m); }
   updateHero();
-  const dataSig = JSON.stringify([state.role, d.today, d.stats, d.recent, d.settings.wake, d.settings.sleep, d.settings.timezone, m.rems.map((r) => r.interval_min)]);
+  const dataSig = JSON.stringify([state.role, d.today, d.points, d.stats, d.recent, d.settings.wake, d.settings.sleep, d.settings.timezone, m.rems.map((r) => r.interval_min)]);
   if (sigs.data !== dataSig) {
     sigs.data = dataSig;
     renderToday();
+    renderPoints();
     renderGallery();
     renderWeek();
     renderLog();
