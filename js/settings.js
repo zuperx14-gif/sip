@@ -137,7 +137,7 @@ function deviceSection(d) {
       emit('pushchange');
       drawPush();
     } }) : null;
-    pushRow.replaceChildren(h('i', { class: `status-dot ${dot}` }), h('div', { class: 'row-text' }, h('b', { text: 'Notifications' }), h('span', { text: desc })), btn);
+    pushRow.replaceChildren(h('i', { class: `status-dot ${dot}` }), h('div', { class: 'row-text' }, h('b', { text: 'Notifications' }), h('span', { text: desc })), ...(btn ? [btn] : []));
   };
   drawPush();
 
