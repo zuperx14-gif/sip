@@ -246,8 +246,8 @@ function shiftSection(d) {
     h('div', { class: 'list' },
       ...calRows,
       h('div', { class: 'row col' }, strip),
-      row('Sleep after a shift from', null, timeInput('Sleep after a shift from', s.day_sleep_start, (v) => queue({ day_sleep_start: v }))),
-      row('Until', null, timeInput('Sleep after a shift until', s.day_sleep_end, (v) => queue({ day_sleep_end: v })), 'sub')),
+      row('Sleep after a shift until', 'Quiet from the moment the shift ends until this time.', timeInput('Sleep after a shift until', s.day_sleep_end, (v) => queue({ day_sleep_end: v }))),
+      row('Shift ends at', 'Only used for nights you tap. The calendar gives its own end time.', timeInput('Shift ends at', s.day_sleep_start, (v) => queue({ day_sleep_start: v })), 'sub')),
     h('p', { class: 'group-note', text: 'Work a night, sleep the next day: nudges keep going through the shift and stay quiet for sleep after it. No shift, normal night: the usual wake-up and bedtime apply. Nights can come from the calendar link or a tap.' }));
 }
 
