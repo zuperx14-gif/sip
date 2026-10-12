@@ -653,3 +653,14 @@ svg { display: block; }
 .shift-chip[aria-pressed="true"] b { color: #fff; }
 .row.col .field.wide { width: 100%; margin-top: 10px; }
 .row.col + .row.col { border-top: 1px solid var(--line); }
+
+/* ---------- gift ---------- */
+.gift { display: flex; align-items: center; gap: 16px; padding: 18px 20px; margin: 12px 0; border-radius: var(--r-md); color: #fff;
+  background: linear-gradient(135deg, #d9532d 0%, #e8824a 55%, #f0a868 100%); box-shadow: var(--shadow-2); position: relative; overflow: hidden; }
+.gift::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.28) 50%, transparent 70%); transform: translateX(-100%); animation: gift-shine 3.6s var(--ease) infinite; }
+@keyframes gift-shine { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .gift::after { animation: none; } }
+.gift-icon { flex: none; width: 52px; height: 52px; border-radius: 16px; background: rgba(255, 255, 255, 0.22); display: grid; place-items: center; }
+.gift-icon svg { width: 28px; height: 28px; }
+.gift-from { font-size: 14px; font-weight: 620; opacity: 0.92; }
+.gift-points { font-family: var(--serif); font-size: 34px; line-height: 1.05; letter-spacing: -0.01em; }

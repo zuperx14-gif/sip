@@ -345,6 +345,20 @@ function renderToday() {
       h('div', { class: 'mini' }, h('b', { text: String(week) }), h('span', { text: 'Done this week' }))));
 }
 
+// A gift of bonus points stays on the home screen until its show_until time.
+function renderGift() {
+  const box = $('#gift');
+  const g = state.data.gift;
+  const live = g && new Date(g.show_until).getTime() > now();
+  box.hidden = !live;
+  if (!live) { box.replaceChildren(); return; }
+  box.replaceChildren(
+    h('span', { class: 'gift-icon' }, icon('gift')),
+    h('div', { class: 'gift-text' },
+      h('p', { class: 'gift-from', text: `A gift from ${g.from}` }),
+      h('p', { class: 'gift-points', text: `+${Number(g.points).toLocaleString()} points` })));
+}
+
 // Points: +200 water and +100 bathroom for a clean day, 3x off for any miss.
 function renderPoints() {
   const box = $('#points');
@@ -369,7 +383,7 @@ function renderPoints() {
     h('div', { class: 'pts-legend' },
       h('span', { text: p.streak === 0 ? 'Streak starts with one clean day' : `Day ${into || goal} of ${goal}` }),
       h('span', { text: laps > 0 ? `${laps} × 30-day streak` : `${goal - into} to a 30-day streak` })),
-    h('p', { class: 'pts-rules', text: 'Clean day: +200 water, +100 bathroom. Any miss: −600 or −300 instead.' }));
+    h('p', { class: 'pts-rules', text: `Clean day: +200 water, +100 bathroom. Any miss: −600 or −300 instead.${p.gifted ? ` Includes ${Number(p.gifted).toLocaleString()} gifted.` : ''}` }));
 }
 
 function weekDays() {
@@ -533,10 +547,11 @@ function render() {
   const tileSig = JSON.stringify([state.role, m.rems.map((r) => [r.kind, r.enabled]), m.s.require_photo]);
   if (sigs.tiles !== tileSig) { sigs.tiles = tileSig; sigs.hero = null; buildTiles(m); }
   updateHero();
-  const dataSig = JSON.stringify([state.role, d.today, d.points, d.stats, d.recent, d.settings.wake, d.settings.sleep, d.settings.timezone, m.rems.map((r) => r.interval_min)]);
+  const dataSig = JSON.stringify([state.role, d.today, d.gift, d.points, d.stats, d.recent, d.settings.wake, d.settings.sleep, d.settings.timezone, m.rems.map((r) => r.interval_min)]);
   if (sigs.data !== dataSig) {
     sigs.data = dataSig;
     renderToday();
+    renderGift();
     renderPoints();
     renderGallery();
     renderWeek();
