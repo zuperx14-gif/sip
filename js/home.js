@@ -359,7 +359,7 @@ function renderGift() {
       h('p', { class: 'gift-points', text: `+${Number(g.points).toLocaleString()} points` })));
 }
 
-// Points: +200 water and +100 bathroom for a clean day, 3x off for any miss.
+// Points: 200 water + 100 bathroom per day, split evenly across that day's check-ins.
 function renderPoints() {
   const box = $('#points');
   const p = state.data.points;
@@ -370,9 +370,10 @@ function renderPoints() {
   const into = p.streak % goal;
   const laps = Math.floor(p.streak / goal);
   const lost = p.today.lost;
+  const earned = (p.today.water || 0) + (p.today.bathroom || 0);
   const todayLine = lost < 0
-    ? h('p', { class: 'pts-today bad', text: `${fmt(lost)} today. A missed check-in costs 3×.` })
-    : h('p', { class: 'pts-today', text: partner() ? '+300 banks tonight if the day stays clean.' : '+300 is yours tonight if today stays clean.' });
+    ? h('p', { class: 'pts-today bad', text: `${fmt(lost)} from missed check-ins today. Today so far: ${earned > 0 ? '+' : ''}${fmt(earned)}.` })
+    : h('p', { class: 'pts-today', text: earned > 0 ? `+${fmt(earned)} today so far. A clean day is worth 300.` : 'A clean day is worth 300.' });
   const bar = h('div', { class: 'pts-bar', role: 'img', 'aria-label': `${into} of ${goal} days toward the next streak milestone` },
     h('i', { style: `width:${(into / goal) * 100}%` }));
   box.replaceChildren(
@@ -383,7 +384,7 @@ function renderPoints() {
     h('div', { class: 'pts-legend' },
       h('span', { text: p.streak === 0 ? 'Streak starts with one clean day' : `Day ${into || goal} of ${goal}` }),
       h('span', { text: laps > 0 ? `${laps} × 30-day streak` : `${goal - into} to a 30-day streak` })),
-    h('p', { class: 'pts-rules', text: `Clean day: +200 water, +100 bathroom. Any miss: −600 or −300 instead.${p.gifted ? ` Includes ${Number(p.gifted).toLocaleString()} gifted.` : ''}` }));
+    h('p', { class: 'pts-rules', text: `A day is worth 200 for water and 100 for bathroom, split evenly across its check-ins. Done adds a slice, a miss takes one away.${p.gifted ? ` Includes ${Number(p.gifted).toLocaleString()} gifted.` : ''}` }));
 }
 
 function weekDays() {
