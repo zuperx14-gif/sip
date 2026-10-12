@@ -1,5 +1,8 @@
 // The one-tap confirm flow: full-screen camera, shutter, success moment.
-import { $, state, rpc, load, on, emit, toast, buzz, wait, reducedMotion, KINDS, KIND_ICON, KIND_LABEL } from './core.js';
+import { $, state, rpc, load, on, emit, toast, buzz, wait, reducedMotion, store, KINDS, KIND_ICON, KIND_LABEL } from './core.js';
+
+// Which camera to open: 'user' (front, mirrored) or 'environment' (rear). Remembered per device.
+let facing = store.get('sip-facing') === 'environment' ? 'environment' : 'user';
 
 const el = $('#capture');
 const video = $('#cap-video');
@@ -49,6 +52,8 @@ function fallback(reason) {
 
 async function startCamera() {
   wantCamera = true;
+  el.dataset.facing = facing;
+  $('#cap-file').setAttribute('capture', facing);
   const mine = ++token;
   setMode('starting');
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return fallback('unsupported');
@@ -57,7 +62,7 @@ async function startCamera() {
   try {
     const s = await navigator.mediaDevices.getUserMedia({
       audio: false,
-      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+      video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 960 } },
     });
     clearTimeout(slow);
     if (mine !== token || el.hidden) { s.getTracks().forEach((t) => t.stop()); return; }
@@ -162,7 +167,7 @@ async function submit(photo) {
 function shoot() {
   if (busy || !stream || !video.videoWidth) return;
   let url;
-  try { url = toDataURL(video, video.videoWidth, video.videoHeight, true); }
+  try { url = toDataURL(video, video.videoWidth, video.videoHeight, facing === 'user'); }
   catch (e) { return toast(e.message); }
   const flash = $('#cap-flash');
   flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
@@ -198,6 +203,12 @@ export function closeCapture(instant) {
 export const captureOpen = () => !el.hidden;
 
 $('#cap-close').addEventListener('click', () => closeCapture());
+$('#cap-flip').addEventListener('click', () => {
+  facing = facing === 'user' ? 'environment' : 'user';
+  store.set('sip-facing', facing);
+  stopCamera();
+  startCamera();
+});
 $('#cap-shutter').addEventListener('click', shoot);
 $('#cap-skip').addEventListener('click', () => { if (!photoRequired()) submit(null); });
 $('#cap-done').addEventListener('click', () => submit(null));

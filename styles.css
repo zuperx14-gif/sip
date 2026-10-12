@@ -664,3 +664,7 @@ svg { display: block; }
 .gift-icon svg { width: 28px; height: 28px; }
 .gift-from { font-size: 14px; font-weight: 620; opacity: 0.92; }
 .gift-points { font-family: var(--serif); font-size: 34px; line-height: 1.05; letter-spacing: -0.01em; }
+
+/* ---------- camera flip ---------- */
+.capture[data-facing="environment"] #cap-video { transform: none; }
+.capture:not([data-mode="camera"]):not([data-mode="starting"]) #cap-flip { visibility: hidden; }
