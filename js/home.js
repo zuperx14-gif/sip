@@ -384,7 +384,7 @@ function renderPoints() {
     h('div', { class: 'pts-legend' },
       h('span', { text: p.streak === 0 ? 'Streak starts with one clean day' : `Day ${into || goal} of ${goal}` }),
       h('span', { text: laps > 0 ? `${laps} × 30-day streak` : `${goal - into} to a 30-day streak` })),
-    h('p', { class: 'pts-rules', text: `A day is worth 200 for water and 100 for bathroom, split evenly across its check-ins. Done adds a slice, a miss takes one away.${p.gifted ? ` Includes ${Number(p.gifted).toLocaleString()} gifted.` : ''}` }));
+    h('p', { class: 'pts-rules', text: `A day is worth 200 for water and 100 for bathroom, split evenly across its check-ins. Done adds a slice, a miss takes two away.${p.gifted ? ` Includes ${Number(p.gifted).toLocaleString()} gifted.` : ''}` }));
 }
 
 function weekDays() {
